@@ -11,23 +11,31 @@ class UserCreate(UserBase):
     
 
 class UserResponse(UserBase):
-    scores: list[ScoreSimple] = []
+    scores: list[ScoreBase] = []
     id: int
     model_config = ConfigDict(from_attributes=True)
+
+class UserUpdate(UserBase):
+    username: str | None = Field(default=None, min_length=5, max_length=50)
+    email: str | None = Field(default=None, max_length=120)
+    pw_hash: str | None = Field(default=None, max_length=200)
+
 
 
 
 class ScoreBase(BaseModel):
     score: int 
     date: datetime
-
-class ScoreSimple(ScoreBase):
-    score: int
-    date: datetime
+    scale: str
+    scale_key: str
     model_config = ConfigDict(from_attributes=True)
 
+
+# class ScoreSimple(ScoreBase):
+#     model_config = ConfigDict(from_attributes=True)
+
 class ScoreCreate(ScoreBase):
-    pass
+    user_id: int
 
 class ScoreResponse(ScoreBase):
     id: int

@@ -1,10 +1,12 @@
 import models
 from database import Base, engine, get_db
-from schemas import UserCreate, UserResponse, ScoreCreate, ScoreResponse
+from schemas import UserCreate, UserResponse, ScoreCreate, ScoreResponse, UserUpdate
 from fastapi import FastAPI, APIRouter, HTTPException, status, Depends
 from typing import Annotated
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+import pydantic
+
 
 
 router = APIRouter()
@@ -45,5 +47,37 @@ def create_user(user : UserCreate, db: Annotated[Session, Depends(get_db)]):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+@router.patch('/{user_id}',
+              response_model=UserResponse,
+              status_code=status.HTTP_201_CREATED)
+def update_user(user_id : int, user_data: UserUpdate, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    else:
+        update_data = user_data.model_dump(exclude_unset=True)
+
+        for field, value in update_data.items():
+            setattr(user, field, value)
+        
+        db.commit()
+        db.refresh(user)
+        return user
+    
+@router.delete('/{user_id}',
+               status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    else:
+        db.delete(user)
+        db.commit()
+
+
 
 

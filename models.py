@@ -21,6 +21,8 @@ class Score(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False, index=True)
     score: Mapped[int] = mapped_column(Integer, nullable=False)
+    scale: Mapped[str] = mapped_column(String(50), nullable=False)
+    scale_key: Mapped[str] = mapped_column(String(5), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     user: Mapped["User"] = relationship(back_populates='scores')

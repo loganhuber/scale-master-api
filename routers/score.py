@@ -31,10 +31,24 @@ def create_score(score : ScoreCreate, db: Annotated[Session, Depends(get_db)]):
     else:
         new_score = models.Score(
             score=score.score,
-            user_id=score.user_id
+            user_id=score.user_id,
+            scale=score.scale,
+            scale_key=score.scale_key
         )
 
         db.add(new_score)
         db.commit()
         db.refresh(new_score)
         return new_score
+    
+@router.delete('/{score_id}',
+               status_code=status.HTTP_204_NO_CONTENT)
+def delete_score(score_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Score).where(models.Score.id == score_id))
+    score = result.scalars().first()
+
+    if not score:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    else:
+        db.delete(score)
+        db.commit()
