@@ -6,6 +6,7 @@ dist/
 wheels/
 *.egg-info
 scale-master.db
-
 # Virtual environments
 .venv
+
+.env

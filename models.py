@@ -27,5 +27,7 @@ class Score(Base):
 
     user: Mapped["User"] = relationship(back_populates='scores')
 
+    
+
 
 
