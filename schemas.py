@@ -9,7 +9,6 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     pw_hash: str = Field(min_length=8)
     
-
 class UserResponse(UserBase):
     scores: list[ScoreBase] = []
     id: int
@@ -19,7 +18,6 @@ class UserUpdate(UserBase):
     username: str | None = Field(default=None, min_length=5, max_length=50)
     email: str | None = Field(default=None, max_length=120)
     pw_hash: str | None = Field(default=None, max_length=200)
-
 
 class Token(BaseModel):
     access_token: str
@@ -32,12 +30,10 @@ class ScoreBase(BaseModel):
     scale_key: str
     model_config = ConfigDict(from_attributes=True)
 
-
 class ScoreCreate(ScoreBase):
-    user_id: int
+    pass
 
 class ScoreResponse(ScoreBase):
     id: int
     user_id: int
     user: UserBase
-

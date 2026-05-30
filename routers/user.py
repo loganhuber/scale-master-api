@@ -9,12 +9,16 @@ import pydantic
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 
-from auth import create_access_token, verify_access_token, verify_password, hash_password, oauth2_scheme
+from auth import create_access_token, verify_access_token, verify_password, hash_password, oauth2_scheme, CurrentUser
 from config import settings
 
 
 router = APIRouter()
 
+
+@router.get('/me', response_model=UserResponse)
+def get_current_user(current_user : CurrentUser):
+    return current_user
 
 @router.get('/{user_id}', response_model=UserResponse)
 def get_user(user_id : int, db: Annotated[Session, Depends(get_db)]):
@@ -62,12 +66,11 @@ def login_for_access_token(
 
     user = result.scalars().first()
 
-
     if not user or not verify_password(form_data.password, user.pw_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
-            headers={"WWW-Authenicate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"}
         )
     
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
@@ -77,43 +80,22 @@ def login_for_access_token(
     )
     return Token(access_token=access_token, token_type='bearer')
 
-@router.get('/me', response_model=UserResponse)
-def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: Annotated[Session, Depends(get_db)]
-):
-    """Get the currently authenticated user"""
-    user_id = verify_access_token(token)
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={'WWW-Authenticate': 'Bearer'}
-        )
-    
-    try:
-        user_id_int = int(user_id)
-    except (TypeError, ValueError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"}
-        )  
-    result = db.execute(select(models.User).where(models.User.id == user_id_int))
-    user = result.scalars().first()
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-            hearders={"WWW-Authenticate": "Bearer"}
-        )
-    return user
 
 @router.patch('/{user_id}',
               response_model=UserResponse,
               status_code=status.HTTP_201_CREATED)
-def update_user(user_id : int, user_data: UserUpdate, db: Annotated[Session, Depends(get_db)]):
+def update_user(
+    user_id : int,
+    user_data: UserUpdate, 
+    current_user : CurrentUser,
+    db: Annotated[Session, Depends(get_db)]
+    ):
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Not authorized to edit this profile'
+        )
     result = db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
     if not user:
@@ -130,7 +112,16 @@ def update_user(user_id : int, user_data: UserUpdate, db: Annotated[Session, Dep
     
 @router.delete('/{user_id}',
                status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
+def delete_user(user_id: int,
+                current_user : CurrentUser,
+                db: Annotated[Session,
+                Depends(get_db)]
+                ):
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Not authorized to delete this user'
+        )
     result = db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
 
@@ -139,7 +130,3 @@ def delete_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
     else:
         db.delete(user)
         db.commit()
-
-
-
-
