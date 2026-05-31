@@ -10,7 +10,7 @@ from auth import CurrentUser
 router = APIRouter()
 
 @router.get('/{score_id}', response_model=ScoreResponse)
-def get_scores(score_id : int, db: Annotated[Session, Depends(get_db)]):
+def get_score(score_id : int, db: Annotated[Session, Depends(get_db)]):
     result = db.execute(select(models.Score).where(models.Score.id == score_id))
     existing_score = result.scalars().first()
 
