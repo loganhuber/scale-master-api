@@ -6,6 +6,7 @@ from typing import Annotated
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from auth import CurrentUser
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -23,11 +24,14 @@ def get_score(score_id : int, db: Annotated[Session, Depends(get_db)]):
 @router.post('', response_model=ScoreCreate, status_code=status.HTTP_201_CREATED)
 def create_score(score : ScoreCreate, current_user: CurrentUser, db: Annotated[Session, Depends(get_db)]):
 
+    now = datetime.now(timezone.utc)
+
     new_score = models.Score(
         score=score.score,
         user_id=current_user.id,
         scale=score.scale,
-        scale_key=score.scale_key
+        scale_key=score.scale_key,
+        date=now
     )
 
     db.add(new_score)

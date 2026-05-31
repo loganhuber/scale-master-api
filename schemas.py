@@ -25,15 +25,16 @@ class Token(BaseModel):
 
 class ScoreBase(BaseModel):
     score: int 
-    date: datetime
     scale: str
     scale_key: str
     model_config = ConfigDict(from_attributes=True)
 
 class ScoreCreate(ScoreBase):
     pass
+    
 
 class ScoreResponse(ScoreBase):
     id: int
     user_id: int
     user: UserBase
+    date: datetime
