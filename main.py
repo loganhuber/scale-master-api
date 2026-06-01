@@ -1,19 +1,10 @@
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-from pydantic import BaseModel
-from schemas import UserCreate, UserResponse
 
-from typing import Annotated
-
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
-from database import Base, engine, get_db
+from database import Base, engine
 from routers import user, score
 
 Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI()
 
