@@ -32,7 +32,7 @@ def get_user(user_id : int, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.post('',
-        response_model=UserCreate,
+        response_model=UserResponse,
         status_code=status.HTTP_201_CREATED
         )
 def create_user(user : UserCreate, db: Annotated[Session, Depends(get_db)]):
@@ -49,7 +49,7 @@ def create_user(user : UserCreate, db: Annotated[Session, Depends(get_db)]):
     new_user = models.User(
         username=user.username,
         email=user.email.lower(),
-        pw_hash=hash_password(user.pw_hash)
+        pw_hash=hash_password(user.password)
     )
 
     db.add(new_user)

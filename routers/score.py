@@ -19,6 +19,15 @@ def get_score(score_id : int, db: Annotated[Session, Depends(get_db)]):
         return existing_score
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Score Not Found")
+    
+@router.get('/{user_id}/scores', response_model=list[ScoreResponse])
+def get_user_scores(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Score).where(models.Score.user_id == user_id))
+    scores = result.scalars().all()
+
+    if scores:
+        return scores
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No scores found")
 
 
 @router.post('', response_model=ScoreCreate, status_code=status.HTTP_201_CREATED)
@@ -31,6 +40,7 @@ def create_score(score : ScoreCreate, current_user: CurrentUser, db: Annotated[S
         user_id=current_user.id,
         scale=score.scale,
         scale_key=score.scale_key,
+        bpm=score.bpm,
         date=now
     )
 
