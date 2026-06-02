@@ -4,9 +4,9 @@ from datetime import datetime
 
 class UserBase(BaseModel):
     username: str = Field(min_length=5, max_length=50)
-    email: EmailStr = Field(max_length=120)
 
 class UserCreate(UserBase):
+    email: EmailStr = Field(max_length=120)
     password: str = Field(min_length=8)
     
 class UserResponse(UserBase):
