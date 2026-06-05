@@ -39,3 +39,4 @@ class ScoreResponse(ScoreBase):
     user_id: int
     user: UserBase
     date: datetime
+    model_config = ConfigDict(from_attributes=True)

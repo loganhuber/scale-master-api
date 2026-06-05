@@ -48,6 +48,23 @@ def create_score(score : ScoreCreate, current_user: CurrentUser, db: Annotated[S
     db.commit()
     db.refresh(new_score)
     return new_score
+
+@router.post('/batch', response_model=list[ScoreCreate], status_code=status.HTTP_201_CREATED)
+def create_batch_scores(scores: list[ScoreCreate], current_user: CurrentUser, db: Annotated[Session, Depends(get_db)]):
+
+    now = datetime.now(timezone.utc)
+
+    new_scores = [
+        models.Score(
+            **score.model_dump(),
+            user_id=current_user.id,
+            date=now
+        ) 
+        for score in scores
+    ]
+    db.add_all(new_scores)
+    db.commit()
+    return new_scores
     
 
 @router.delete('/{score_id}',
