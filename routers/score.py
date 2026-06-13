@@ -3,7 +3,7 @@ from database import Base, engine, get_db
 from schemas import UserCreate, UserResponse, ScoreCreate, ScoreResponse
 from fastapi import FastAPI, APIRouter, HTTPException, status, Depends
 from typing import Annotated
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from sqlalchemy.orm import Session
 from auth import CurrentUser
 from datetime import datetime, timezone
@@ -22,7 +22,7 @@ def get_score(score_id : int, db: Annotated[Session, Depends(get_db)]):
     
 @router.get('/{user_id}/scores', response_model=list[ScoreResponse])
 def get_user_scores(user_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(select(models.Score).where(models.Score.user_id == user_id))
+    result = db.execute(select(models.Score).where(models.Score.user_id == user_id).order_by(desc((models.Score.date))))
     scores = result.scalars().all()
 
     if scores:
