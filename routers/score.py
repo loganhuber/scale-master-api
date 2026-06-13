@@ -30,7 +30,7 @@ def get_user_scores(user_id: int, db: Annotated[Session, Depends(get_db)]):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No scores found")
 
 
-@router.post('', response_model=ScoreCreate, status_code=status.HTTP_201_CREATED)
+@router.post('', response_model=ScoreResponse, status_code=status.HTTP_201_CREATED)
 def create_score(score : ScoreCreate, current_user: CurrentUser, db: Annotated[Session, Depends(get_db)]):
 
     now = datetime.now(timezone.utc)
