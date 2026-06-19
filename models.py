@@ -15,6 +15,7 @@ class User(Base):
     pw_hash: Mapped[str] = mapped_column(String(200), nullable=False)
     scores: Mapped[list["Score"]] = relationship(back_populates='user')
 
+
 class Score(Base):
     __tablename__ = 'scores'
 
