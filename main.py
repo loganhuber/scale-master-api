@@ -11,7 +11,8 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",  # Default Create React App port
     "http://localhost:5173",  # Default Vite port
-    "https://yourproductiondomain.com", 
+    "http://127.0.0.1:5173",
+    "https://scale-master.xyz", 
 ]
 
 app.add_middleware(
