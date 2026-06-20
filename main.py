@@ -12,6 +12,7 @@ origins = [
     "http://localhost:3000",  # Default Create React App port
     "http://localhost:5173",  # Default Vite port
     "http://127.0.0.1:5173",
+    "https://loganhuber.github.io/scale-master/",
     "https://scale-master.xyz", 
 ]
 
